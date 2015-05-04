@@ -1,0 +1,66 @@
+plugins {
+  id 'maven'
+  id 'java' 
+  id 'application' 
+  id 'com.github.johnrengelman.shadow' version '1.2.0'
+}
+
+// The main class of the application
+mainClassName = 'net.mancke.examples.dropwizard.Main'
+
+version = '0.1'
+
+// Set our project variables
+project.ext {
+    dropwizardVersion = '0.8.0'
+    springVersion =  '4.1.4.RELEASE'
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile (
+        'io.dropwizard:dropwizard-core:' + dropwizardVersion,
+        'org.springframework:spring-web:4.1.2.RELEASE',
+    )
+    testCompile (
+	    'junit:junit:4.11',
+            'io.dropwizard:dropwizard-testing:' + dropwizardVersion,
+    )
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file:///var/lib/tron-maven-repository")
+        }
+    }
+}
+
+// Configure the run task to start the Dropwizard service
+run {
+    args 'server', 'config.yaml'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
+// Configure the shadow jar task
+shadowJar {
+    archiveName 'dropwizard-example.jar'
+    mergeServiceFiles()
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
